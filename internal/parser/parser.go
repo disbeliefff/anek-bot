@@ -74,7 +74,7 @@ func (p *Parser) Start(ctx context.Context) error {
 		return fmt.Errorf("initial parse failed: %w", err)
 	}
 
-	ticker := time.NewTicker(p.cfg.IntervalMins * time.Minute)
+	ticker := time.NewTicker(p.cfg.IntervalMins)
 	defer ticker.Stop()
 
 	for {

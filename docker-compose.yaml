@@ -22,12 +22,8 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
-    command: ["--js", "--jetstream"]
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "6222:6222"
+    command: ["--js", "--jetstream", "-m", "8222"]
 
   bot:
     build:
@@ -42,8 +38,6 @@ services:
       - "8080:8080"
     depends_on:
       postgres:
-        condition: service_healthy
-      nats:
         condition: service_healthy
 
   migrate:
@@ -60,6 +54,19 @@ services:
         condition: service_healthy
     entrypoint: ["/app/goose"]
     command: ["-dir", "/app/migrations", "up"]
+    profiles:
+      - migrate
+
+  nats-init:
+    image: natsio/nats-box:latest
+    container_name: anek-bot-nats-init
+    depends_on:
+      nats:
+        condition: service_started
+    entrypoint: ["nats", "stream", "add", "ANEK"]
+    command: ["--subjects=jokes.new", "--subjects=telegram.send", "--ack", "--defaults"]
+    environment:
+      NATS_URL: nats://nats:4222
     profiles:
       - migrate
 

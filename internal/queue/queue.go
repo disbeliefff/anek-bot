@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	JokeSubject     = "jokes.new"
-	TelegramSubject = "telegram.send"
-	ConsumerGroup   = "anek-bot"
+	JokeSubject           = "jokes.new"
+	TelegramSubject       = "telegram.send"
+	JokeConsumerGroup     = "jokes-consumer"
+	TelegramConsumerGroup = "telegram-consumer"
 )
 
 type NATS struct {
@@ -103,8 +104,7 @@ func (n *NATS) PublishTelegramMessage(ctx context.Context, msg *TelegramMessage)
 func (n *NATS) ConsumeJokes(ctx context.Context, handler func(*JokeMessage) error) error {
 	sub, err := n.jetstream.PullSubscribe(
 		JokeSubject,
-		ConsumerGroup,
-		nats.BindStream(n.cfg.StreamName),
+		JokeConsumerGroup,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to jokes: %w", err)
@@ -151,8 +151,7 @@ func (n *NATS) ConsumeJokes(ctx context.Context, handler func(*JokeMessage) erro
 func (n *NATS) ConsumeTelegramMessages(ctx context.Context, handler func(*TelegramMessage) error) error {
 	sub, err := n.jetstream.PullSubscribe(
 		TelegramSubject,
-		ConsumerGroup,
-		nats.BindStream(n.cfg.StreamName),
+		TelegramConsumerGroup,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to telegram: %w", err)

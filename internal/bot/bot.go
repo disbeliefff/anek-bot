@@ -55,6 +55,8 @@ func (b *Bot) Start() (*telebot.Bot, error) {
 
 	go b.startTelegramConsumer(context.Background())
 
+	go tbot.Start()
+
 	return tbot, nil
 }
 
