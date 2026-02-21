@@ -1,6 +1,6 @@
 ARG GO_VERSION=1.25.6
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-bookworm-slim AS build
+FROM golang:${GO_VERSION}-bookworm-slim AS build
 
 WORKDIR /app
 
