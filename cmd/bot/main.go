@@ -74,6 +74,7 @@ func main() {
 	go func() {
 		logger.Info("Starting joke consumer...")
 		if err := q.ConsumeJokes(ctx, func(joke *queue.JokeMessage) error {
+			logger.Info("Received joke from queue", logger.String("source", string(joke.Source)), logger.String("hash", joke.Hash))
 			m := &models.Joke{
 				Content:   joke.Content,
 				Source:    string(joke.Source),

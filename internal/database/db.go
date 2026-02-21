@@ -88,7 +88,11 @@ func (r *JokeRepository) Create(ctx context.Context, joke *models.Joke) error {
 		ON CONFLICT (hash) DO NOTHING
 		RETURNING id, created_at
 	`
-	return r.db.Pool.QueryRow(ctx, query, joke.Content, joke.Source, joke.SourceURL, joke.Hash).Scan(&joke.ID, &joke.CreatedAt)
+	err := r.db.Pool.QueryRow(ctx, query, joke.Content, joke.Source, joke.SourceURL, joke.Hash).Scan(&joke.ID, &joke.CreatedAt)
+	if err == pgx.ErrNoRows {
+		return nil
+	}
+	return err
 }
 
 func (r *JokeRepository) GetRandom(ctx context.Context) (*models.Joke, error) {

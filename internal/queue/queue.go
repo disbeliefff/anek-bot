@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"anek-bot/internal/config"
 	"anek-bot/internal/models"
@@ -116,13 +117,16 @@ func (n *NATS) ConsumeJokes(ctx context.Context, handler func(*JokeMessage) erro
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			msgs, err := sub.Fetch(10, nats.MaxWait(500))
+			msgs, err := sub.Fetch(10, nats.MaxWait(500*time.Millisecond))
 			if err != nil {
 				if err == nats.ErrTimeout {
 					continue
 				}
-				return fmt.Errorf("failed to fetch messages: %w", err)
+				logger.Error("Failed to fetch messages", logger.Err(err))
+				continue
 			}
+
+			logger.Info("Received messages", logger.Int("count", len(msgs)))
 
 			for _, msg := range msgs {
 				var joke JokeMessage

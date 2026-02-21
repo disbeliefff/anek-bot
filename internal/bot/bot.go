@@ -61,12 +61,43 @@ func (b *Bot) Start() (*telebot.Bot, error) {
 }
 
 func (b *Bot) setupHandlers(bot *telebot.Bot) {
+	bot.Handle(telebot.OnText, func(c telebot.Context) error {
+		logger.Info("Incoming text message",
+			logger.Int64("user_id", c.Sender().ID),
+			logger.String("username", c.Sender().Username),
+			logger.String("text", c.Text()),
+		)
+		return b.handleText(c)
+	})
+
+	bot.Handle(telebot.OnEdited, func(c telebot.Context) error {
+		logger.Info("Incoming edited message",
+			logger.Int64("user_id", c.Sender().ID),
+			logger.String("username", c.Sender().Username),
+		)
+		return nil
+	})
+
+	bot.Handle(telebot.OnCallback, func(c telebot.Context) error {
+		logger.Info("Incoming callback",
+			logger.Int64("user_id", c.Sender().ID),
+			logger.String("callback_data", c.Callback().Data),
+		)
+		return nil
+	})
+
+	bot.Handle(telebot.OnChatJoinRequest, func(c telebot.Context) error {
+		logger.Info("Incoming chat join request",
+			logger.Int64("user_id", c.Sender().ID),
+			logger.String("username", c.Sender().Username),
+		)
+		return nil
+	})
+
 	bot.Handle("/start", b.handleStart)
 	bot.Handle("/joke", b.handleJoke)
 	bot.Handle("/stats", b.handleStats)
 	bot.Handle("/help", b.handleHelp)
-
-	bot.Handle(telebot.OnText, b.handleText)
 }
 
 func (b *Bot) startTelegramConsumer(ctx context.Context) {

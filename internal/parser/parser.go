@@ -70,9 +70,12 @@ func (p *Parser) Start(ctx context.Context) error {
 		return nil
 	}
 
+	logger.Info("Running initial parse...")
 	if err := p.ParseAll(ctx); err != nil {
+		logger.Error("Initial parse failed", logger.Err(err))
 		return fmt.Errorf("initial parse failed: %w", err)
 	}
+	logger.Info("Initial parse completed")
 
 	ticker := time.NewTicker(p.cfg.IntervalMins)
 	defer ticker.Stop()
@@ -109,21 +112,25 @@ func (p *Parser) parseReddit(ctx context.Context) error {
 	limit := p.cfg.Sources.Reddit.Limit
 
 	for _, subreddit := range p.cfg.Sources.Reddit.Subreddits {
+		logger.Info("Parsing subreddit", logger.String("subreddit", subreddit))
 		url := fmt.Sprintf("https://www.reddit.com/r/%s/hot.json?limit=%d", subreddit, limit)
 
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
+			logger.Error("Failed to create request", logger.Err(err))
 			return err
 		}
 		req.Header.Set("User-Agent", "anek-bot/1.0")
 
 		resp, err := p.client.Do(req)
 		if err != nil {
+			logger.Error("Failed to fetch subreddit", logger.String("subreddit", subreddit), logger.Err(err))
 			return err
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
+			logger.Warn("Non-OK status from Reddit", logger.String("subreddit", subreddit), logger.Int("status", resp.StatusCode))
 			continue
 		}
 
@@ -161,6 +168,7 @@ func (p *Parser) parseReddit(ctx context.Context) error {
 				)
 				continue
 			}
+			logger.Info("Published joke to queue", logger.String("source", string(joke.Source)), logger.String("hash", joke.Hash))
 		}
 	}
 
