@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentation
+*.md
+!README.md
+
+# Development files
+Makefile
+docker-compose*.yaml
+
+# Local build
+anek-bot
+goose
+
+# Test
+*_test.go
+/tests/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

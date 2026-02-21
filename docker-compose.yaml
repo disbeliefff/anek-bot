@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:17-bookworm
+    container_name: anek-bot-db
+    environment:
+      POSTGRES_USER: anekbot
+      POSTGRES_PASSWORD: anekbot_password
+      POSTGRES_DB: anekbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anekbot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2.12.3-alpine
+    container_name: anek-bot-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--js", "--jetstream"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anek-bot
+    environment:
+      CONFIG_PATH: /app/configs/config.prod.yaml
+    volumes:
+      - ./configs:/app/configs:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anek-bot-migrate
+    environment:
+      CONFIG_PATH: /app/configs/config.prod.yaml
+    volumes:
+      - ./configs:/app/configs:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/app/goose"]
+    command: ["-dir", "/app/migrations", "up"]
+    profiles:
+      - migrate
+
+volumes:
+  postgres_data:

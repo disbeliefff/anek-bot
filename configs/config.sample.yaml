@@ -1,0 +1,39 @@
+app:
+  name: "anek-bot"
+  environment: "production"
+  log_level: "info"
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "anekbot"
+  password: "CHANGE_ME"
+  name: "anekbot"
+  max_connections: 25
+  min_connections: 5
+
+bot:
+  token: "YOUR_TELEGRAM_BOT_TOKEN"
+  parse_mode: "Markdown"
+
+parser:
+  enabled: true
+  interval_minutes: 30
+  sources:
+    reddit:
+      enabled: true
+      subreddits:
+        - "Jokes"
+        - "funny"
+      limit: 25
+    anekdot:
+      enabled: true
+      limit: 20
+
+nats:
+  url: "nats://localhost:4222"
+  stream_name: "ANEK"
+
+health:
+  port: 8080
+  endpoint: "/healthz"
