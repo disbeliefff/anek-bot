@@ -22,7 +22,7 @@ down:
 	docker compose down
 
 migrate:
-	docker compose --profile migrate run migrate
+	docker compose --profile migrate build --no-cache && docker compose --profile migrate run migrate
 
 logs:
 	docker compose logs -f bot

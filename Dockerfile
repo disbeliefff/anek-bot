@@ -1,6 +1,6 @@
-ARG GO_VERSION=1.25.6
+ARG GO_VERSION=1.25
 
-FROM golang:${GO_VERSION}-bookworm-slim AS build
+FROM golang:${GO_VERSION}-trixie AS build
 
 WORKDIR /app
 

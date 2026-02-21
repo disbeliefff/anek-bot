@@ -1,3 +1,4 @@
+-- +goose Up
 -- Create jokes table
 CREATE TABLE IF NOT EXISTS jokes (
     id SERIAL PRIMARY KEY,
@@ -26,3 +27,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_users_last_interaction ON users(last_interaction);
+
+-- +goose Down
+DROP INDEX IF EXISTS idx_users_last_interaction;
+DROP INDEX IF EXISTS idx_users_telegram_id;
+DROP TABLE IF EXISTS users;
+DROP INDEX IF EXISTS idx_jokes_created_at;
+DROP INDEX IF EXISTS idx_jokes_hash;
+DROP INDEX IF EXISTS idx_jokes_source;
+DROP TABLE IF EXISTS jokes;
